@@ -1,0 +1,12 @@
+{
+  "name": "freshkeep-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm --filter freshkeep-web run dev",
+    "dev:mobile": "pnpm --filter freshkeep-mobile run start"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

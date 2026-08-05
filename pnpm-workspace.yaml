@@ -1,0 +1,14 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+allowBuilds:
+  '@firebase/util': true
+  '@google/genai': true
+  '@tailwindcss/oxide': true
+  esbuild: true
+  protobufjs: true
+  tesseract.js: true
+minimumReleaseAgeExclude:
+  - '@firebase/data-connect@0.7.3'
+  - '@firebase/database-compat@2.1.6'
+  - firebase@12.17.1

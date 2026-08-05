@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.expo/
+
+# Environment files
+.env
+.env.local
+.env*.local
+
+# Temporary files
+refactor.js
+
+# OS files
+.DS_Store
+Thumbs.db
