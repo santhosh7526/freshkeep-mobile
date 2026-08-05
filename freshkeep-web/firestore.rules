@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users can only access their own document and subcollections
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Subcollection: pantry
+      match /pantry/{document} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Subcollection: shoppingList
+      match /shoppingList/{document} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Subcollection: wasteLog
+      match /wasteLog/{document} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}

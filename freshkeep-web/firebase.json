@@ -1,0 +1,11 @@
+{
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "FreshKeep Auth",
+        "supportEmail": "sandymsd57@gmail.com"
+      }
+    }
+  }
+}
