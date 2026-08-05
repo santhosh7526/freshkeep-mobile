@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { createHashRouter, Navigate, useRouteError } from 'react-router-dom';
 import Root from './pages/Root';
 import Login from './pages/Login';
-import { useAuth } from './context/AuthContext';
+import { useAuth } from '@freshkeep/shared';
 
 const Scanner = lazy(() => import('./pages/Scanner'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));

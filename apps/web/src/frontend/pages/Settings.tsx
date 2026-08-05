@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Bell, Shield, LogOut, CheckCircle2 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '@freshkeep/shared';
 import { store } from '../../backend/storage/store';
 import { NotificationSettings } from '../../backend/models/types';
 

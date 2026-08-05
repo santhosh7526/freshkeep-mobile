@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ShoppingCart, Plus, Check, Trash2, Calendar } from 'lucide-react';
 import { ShoppingListItem } from '../../backend/models/types';
-import { usePantry } from '../context/PantryContext';
+import { usePantry } from '@freshkeep/shared';
 
 export default function ShoppingList() {
   const { shoppingList: items, addShoppingItem, updateShoppingItem, removeShoppingItem } = usePantry();

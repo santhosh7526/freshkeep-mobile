@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { setAuthPersistence } from '../lib/firebase';
+import { useAuth } from '@freshkeep/shared';
 import { Leaf, Mail, Lock, User, Eye, EyeOff, ShieldCheck, ArrowRight, ScanLine, Bell, TrendingDown } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -30,8 +29,6 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      await setAuthPersistence(rememberMe);
-
       if (authMode === 'register') {
         await registerWithEmail(email.trim(), password.trim(), name.trim());
         toast.success(`Welcome, ${name.trim() || 'there'}! Account created.`);
@@ -67,7 +64,6 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      await setAuthPersistence(rememberMe);
       await loginWithFirebaseGoogle();
       navigate('/', { replace: true });
     } catch (err: any) {

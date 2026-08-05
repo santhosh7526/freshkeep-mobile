@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Trash2, AlertCircle, DollarSign, TrendingUp, Calendar, Trash } from 'lucide-react';
-import { usePantry } from '../context/PantryContext';
+import { usePantry } from '@freshkeep/shared';
 import { WasteLogEntry } from '../../backend/models/types';
 import { getCategoryIcon } from '../../backend/logic/helpers';
 

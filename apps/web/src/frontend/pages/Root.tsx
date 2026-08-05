@@ -5,8 +5,8 @@ import { Leaf, LogOut, ShieldCheck, Radio, Sparkles } from 'lucide-react';
 import { BottomNav } from '../components/BottomNav';
 import { Sidebar } from '../components/Sidebar';
 import { checkAndNotifyExpiringItems } from '../../backend/services/notifications';
-import { useAuth } from '../context/AuthContext';
-import { usePantry } from '../context/PantryContext';
+import { useAuth } from '@freshkeep/shared';
+import { usePantry } from '@freshkeep/shared';
 
 const STORAGE_TIPS = [
   "Tip: Store apples in the fridge to keep them crisp for weeks!",

@@ -3,7 +3,7 @@ import { Package, Search, Plus, Filter, Trash2, Edit2, AlertTriangle, ArrowUpRig
 import { Link } from 'react-router-dom';
 import { FoodItem } from '../../backend/models/types';
 import { getDaysLeft, getCategoryIcon } from '../../backend/logic/helpers';
-import { usePantry } from '../context/PantryContext';
+import { usePantry } from '@freshkeep/shared';
 
 export default function Pantry() {
   const { items, removeItem } = usePantry();
