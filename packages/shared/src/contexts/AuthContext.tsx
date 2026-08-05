@@ -7,8 +7,9 @@ import {
   updateProfile,
   User as FirebaseUser,
 } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../firebase/config';
+import { app, db } from '../firebase/config';
 
 export interface UserProfile {
   id: string;
@@ -35,6 +36,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Initialize auth lazily to prevent eagerly warning before persistence is set
+  const auth = getAuth(app);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (fbUser: FirebaseUser | null) => {
