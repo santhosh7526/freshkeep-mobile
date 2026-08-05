@@ -5,9 +5,9 @@ import { FoodItem } from '../models/types';
 export interface ScannedProductResult {
   name: string;
   category: FoodItem['category'];
-  expiryDate: string;        // YYYY-MM-DD — expiry/best-before/use-by
-  manufacturingDate?: string;// YYYY-MM-DD — manufacturing/packed date
-  batchNumber?: string;
+  expiryDate: string | null;        // YYYY-MM-DD — expiry/best-before/use-by
+  manufacturingDate?: string | null;// YYYY-MM-DD — manufacturing/packed date
+  batchNumber?: string | null;
   confidence: number;
   price: number;
   quantity: number;

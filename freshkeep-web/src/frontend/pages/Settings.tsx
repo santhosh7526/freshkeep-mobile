@@ -5,7 +5,7 @@ import { store } from '../../backend/storage/store';
 import { NotificationSettings } from '../../backend/models/types';
 
 export default function Settings() {
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   
   const [activeTab, setActiveTab] = useState<'notifications' | 'account'>('notifications');
   const [settings, setSettings] = useState<NotificationSettings>({
@@ -13,9 +13,16 @@ export default function Settings() {
     leadTimes: {
       dairy: 2,
       meat: 1,
+      seafood: 1,
       vegetables: 3,
+      fruits: 3,
+      bakery: 2,
       pantry: 7,
-      canned: 30,
+      canned: 14,
+      frozen: 14,
+      beverages: 5,
+      snacks: 7,
+      spices: 30,
     }
   });
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -152,8 +159,8 @@ export default function Settings() {
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Account Profile</h2>
                 
                 <div className="flex items-center gap-4 mb-8 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                  {user?.photoUrl ? (
-                    <img src={user.photoUrl} alt="Profile" className="w-16 h-16 rounded-full shadow-sm object-cover" />
+                  {user?.picture ? (
+                    <img src={user.picture} alt="Profile" className="w-16 h-16 rounded-full shadow-sm object-cover" />
                   ) : (
                     <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xl font-bold">
                       {user?.givenName?.charAt(0) || user?.name?.charAt(0) || 'U'}
@@ -170,7 +177,7 @@ export default function Settings() {
                   <button
                     onClick={() => {
                       if (confirm('Are you sure you want to sign out?')) {
-                        signOut();
+                        logout();
                       }
                     }}
                     className="w-full sm:w-auto px-6 py-3 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl font-bold text-sm transition-colors border border-red-100 flex items-center justify-center gap-2"
