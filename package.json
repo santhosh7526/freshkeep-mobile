@@ -7,6 +7,8 @@
     "dev:mobile": "pnpm --filter freshkeep-mobile run start"
   },
   "devDependencies": {
+    "@types/react": "~19.1.17",
+    "@types/react-dom": "^19.2.4",
     "typescript": "^5.0.0"
   }
 }

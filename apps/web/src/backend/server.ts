@@ -28,7 +28,10 @@ app.post('/api/scan', async (req, res) => {
     console.log('[SCAN] Using API key starting with:', apiKey.substring(0, 8) + '...');
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-flash-latest',
+      generationConfig: { responseMimeType: 'application/json' }
+    });
 
     const prompt = `
       You are an expert Indian food product label scanner with perfect vision.
@@ -40,7 +43,7 @@ app.post('/api/scan', async (req, res) => {
       - "expiryDate": The expiry/use-by/best-before date in YYYY-MM-DD format. Return "" if not clearly visible.
       - "manufacturingDate": The manufacturing/packed/MFD date in YYYY-MM-DD format. Return "" if not clearly visible. NEVER confuse with expiry date.
       - "batchNumber": The batch number or lot code if visible. Otherwise "".
-      - "mrp": The MRP (Maximum Retail Price) in Indian Rupees as a number only. Look for text like "MRP Rs.", "M.R.P", "Price". Return null if not visible.
+      - "price": The MRP (Maximum Retail Price) in Indian Rupees as a number only. Look for text like "MRP Rs.", "M.R.P", "Price". Return null if not visible.
       - "quantity": Always return 1.
       - "unit": "pcs"
       - "rawText": The exact text snippet where you found the expiry date.
@@ -61,12 +64,14 @@ app.post('/api/scan', async (req, res) => {
         const cleanJson = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
         const parsed = JSON.parse(cleanJson);
 
-        // Sanitize date formats
-        if (parsed.expiryDate && !/^\d{4}-\d{2}-\d{2}$/.test(parsed.expiryDate)) {
-          parsed.expiryDate = '';
+        // Sanitize date formats using Date constructor
+        if (parsed.expiryDate) {
+          const d = new Date(parsed.expiryDate);
+          parsed.expiryDate = !isNaN(d.getTime()) ? d.toISOString().split('T')[0] : '';
         }
-        if (parsed.manufacturingDate && !/^\d{4}-\d{2}-\d{2}$/.test(parsed.manufacturingDate)) {
-          parsed.manufacturingDate = '';
+        if (parsed.manufacturingDate) {
+          const d = new Date(parsed.manufacturingDate);
+          parsed.manufacturingDate = !isNaN(d.getTime()) ? d.toISOString().split('T')[0] : '';
         }
 
         console.log(`[SCAN] Product scanned (Attempt ${attempt}): ${parsed.name}, Expiry: ${parsed.expiryDate}`);

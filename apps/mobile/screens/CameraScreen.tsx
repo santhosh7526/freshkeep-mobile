@@ -1,12 +1,19 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 import { usePantry } from '@freshkeep/shared';
-import { Sparkles, Camera, RefreshCw, X, Check, IndianRupee } from 'lucide-react-native';
+import { Sparkles, Camera, RefreshCw, X, Check, IndianRupee, Image as ImageIcon } from 'lucide-react-native';
 import tw from 'twrnc';
+import Constants from 'expo-constants';
 
 // Resolve host URL Dynamically based on dev machine environment
-const BACKEND_URL = 'http://10.0.2.2:5001'; // Default Android emulator loopback. Change to your local network IP (e.g. 192.168.1.x) for physical device testing!
+let BACKEND_URL = 'http://10.0.2.2:5001';
+const hostUri = Constants.expoConfig?.hostUri;
+if (hostUri) {
+  const ip = hostUri.split(':')[0];
+  BACKEND_URL = `http://${ip}:5001`;
+}
 
 export default function CameraScreen({ navigation }: any) {
   const { addItem } = usePantry();
@@ -59,6 +66,31 @@ export default function CameraScreen({ navigation }: any) {
       } catch (err: any) {
         Alert.alert('Capture Error', err.message || 'Could not take photo.');
       }
+    }
+  };
+
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 0.7,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const photo = result.assets[0];
+        setPhotoUri(photo.uri);
+        setPhotoBase64(photo.base64 || null);
+        setIsCameraActive(false);
+        if (photo.base64) {
+          await runOCR(photo.base64);
+        } else {
+          Alert.alert('Error', 'Could not extract base64 from image.');
+        }
+      }
+    } catch (err: any) {
+      Alert.alert('Error picking image', err.message || 'Unknown error');
     }
   };
 
@@ -147,8 +179,9 @@ export default function CameraScreen({ navigation }: any) {
   return (
     <View style={tw`flex-1 bg-black`}>
       {isCameraActive ? (
-        <CameraView style={StyleSheet.absoluteFill} ref={cameraRef}>
-          <View style={styles.overlay}>
+        <View style={tw`flex-1 relative`}>
+          <CameraView style={StyleSheet.absoluteFill} ref={cameraRef} />
+          <View style={[styles.overlay, StyleSheet.absoluteFill]}>
             <View style={styles.reticle}>
               <View style={[styles.corner, styles.topLeft]} />
               <View style={[styles.corner, styles.topRight]} />
@@ -160,29 +193,35 @@ export default function CameraScreen({ navigation }: any) {
             </Text>
             
             {/* Capture controls */}
-            <View style={tw`absolute bottom-10 left-0 right-0 items-center`}>
+            <View style={tw`absolute bottom-10 left-0 right-0 flex-row items-center justify-center`}>
+              <View style={tw`w-16 ml-8`} />
               <TouchableOpacity onPress={handleCapture} style={styles.captureBtn}>
                 <View style={styles.captureInner} />
               </TouchableOpacity>
+              <TouchableOpacity onPress={pickImage} style={tw`w-16 items-center ml-8`}>
+                <View style={tw`w-12 h-12 bg-black/50 rounded-full items-center justify-center border border-white/20`}>
+                  <ImageIcon color="#ffffff" size={24} />
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
-        </CameraView>
+        </View>
       ) : (
         <ScrollView style={tw`flex-1 bg-white`} contentContainerStyle={tw`pb-10`}>
-          {photoUri && (
+          {!!photoUri && (
             <View style={tw`w-full aspect-video bg-gray-900 relative`}>
               <Image source={{ uri: photoUri }} style={tw`w-full h-full`} resizeMode="cover" />
               {isAnalyzing && (
                 <View style={tw`absolute inset-0 bg-black/50 items-center justify-center`}>
-                  <RefreshCw color="#86A789" size={32} style={tw`animate-spin mb-2`} />
+                  <RefreshCw color="#86A789" size={32} style={tw`mb-2`} />
                   <Text style={tw`text-white font-bold text-sm`}>Analyzing Product Label...</Text>
                 </View>
               )}
             </View>
           )}
 
-          {detectedProduct && !isAnalyzing && (
-            <View style={tw`p-5 space-y-4`}>
+          {!!detectedProduct && !isAnalyzing && (
+            <View style={tw`p-5`}>
               <View style={tw`flex flex-row items-center justify-between pb-3 border-b border-gray-100`}>
                 <View style={tw`flex flex-row items-center gap-2`}>
                   <Sparkles color="#059669" size={18} />
