@@ -145,13 +145,13 @@ export default function PantryScreen({ navigation }: any) {
                     <Text style={tw`text-[10px] font-semibold text-gray-400`}>Expiry Date</Text>
                     <Text style={tw`text-[10px] font-bold text-gray-800`}>{item.expiryDate || 'N/A'}</Text>
                   </View>
-                  {item.manufacturingDate && (
+                  {!!item.manufacturingDate && (
                     <View style={tw`flex flex-row justify-between`}>
                       <Text style={tw`text-[10px] font-semibold text-gray-400`}>Mfg Date</Text>
                       <Text style={tw`text-[10px] font-bold text-gray-800`}>{item.manufacturingDate}</Text>
                     </View>
                   )}
-                  {item.batchNumber && (
+                  {!!item.batchNumber && (
                     <View style={tw`flex flex-row justify-between`}>
                       <Text style={tw`text-[10px] font-semibold text-gray-400`}>Batch</Text>
                       <Text style={tw`text-[10px] font-bold text-gray-800`}>{item.batchNumber}</Text>

@@ -26,7 +26,7 @@ const BARCODE_PRODUCT_DATABASE: Record<string, { name: string; category: FoodIte
 /**
  * Parses decoded QR code or Barcode text into a structured food item object.
  */
-export function parseQRText(rawText: string): QRScanResult {
+export async function parseQRText(rawText: string): Promise<QRScanResult> {
   const cleanText = rawText.trim();
 
   // 1. Try parsing JSON payload from QR Code
@@ -79,7 +79,30 @@ export function parseQRText(rawText: string): QRScanResult {
     };
   }
 
-  // 3. Fallback text parsing
+  // 3. Fallback Open Food Facts API lookup
+  try {
+    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${cleanText}.json`);
+    const data = await res.json();
+    if (data.status === 1 && data.product) {
+      const p = data.product;
+      const exp = new Date();
+      exp.setDate(exp.getDate() + 14);
+      return {
+        rawText: cleanText,
+        parsedItem: {
+          name: p.product_name || p.generic_name || p.brands || cleanText,
+          category: 'pantry',
+          expiryDate: exp.toISOString().split('T')[0],
+          price: 0,
+          quantity: 1,
+        },
+      };
+    }
+  } catch (e) {
+    console.warn('Open Food Facts API error:', e);
+  }
+
+  // 4. Fallback text parsing
   const exp = new Date();
   exp.setDate(exp.getDate() + 7);
   return {
@@ -111,10 +134,10 @@ export async function scanQRFromFile(file: File): Promise<QRScanResult | null> {
   try {
     const result = await html5QrCode.scanFile(file, true);
     await html5QrCode.clear();
-    return parseQRText(result);
+    return await parseQRText(result);
   } catch (err) {
     console.warn('QR Code scan from file failed or no QR detected:', err);
-    await html5QrCode.clear().catch(() => {});
+    try { html5QrCode.clear(); } catch(e) {}
     return null;
   }
 }

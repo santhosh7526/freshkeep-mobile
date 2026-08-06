@@ -216,7 +216,7 @@ async function scanWithGemini(imageSrc: string): Promise<ScannedProductResult> {
       batchNumber: parsed.batchNumber || null,
       hasExpiryDate: !!expiryDate,
       confidence: parsed.confidence ?? 90,
-      price: parsed.price || 65,
+      price: parsed.price || 0,
       quantity: parsed.quantity || 1,
       unit: parsed.unit || 'pcs',
       rawTextDetected: parsed.rawText || 'Vision Scanner',
@@ -264,20 +264,7 @@ export async function performRealImageOCR(imageSrc: string): Promise<ScannedProd
     return await scanWithTesseract(imageSrc);
   } catch (err: any) {
     console.error('[OCR] Tesseract also failed:', err.message);
-    return {
-      name: 'Scan Failed',
-      category: 'pantry',
-      expiryDate: null,
-      manufacturingDate: null,
-      hasExpiryDate: false,
-      confidence: 0,
-      price: 0,
-      quantity: 1,
-      unit: 'pcs',
-      rawTextDetected: `Scan error: ${err.message}. Please try a clearer photo.`,
-      daysUntilExpiry: -999,
-      expiryStatus: 'expired',
-    };
+    throw new Error(`OCR scan failed: ${err.message}. Please try a clearer photo.`);
   }
 }
 
