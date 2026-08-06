@@ -4,6 +4,7 @@ import { Toaster, toast } from 'sonner';
 import { Leaf, LogOut, ShieldCheck, Radio, Sparkles } from 'lucide-react';
 import { BottomNav } from '../components/BottomNav';
 import { Sidebar } from '../components/Sidebar';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { checkAndNotifyExpiringItems } from '../../backend/services/notifications';
 import { useAuth } from '@freshkeep/shared';
 import { usePantry } from '@freshkeep/shared';
@@ -53,7 +54,7 @@ export default function Root() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex overflow-hidden">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex overflow-hidden text-gray-900 dark:text-gray-100">
       
       {/* Desktop Sidebar */}
       <Sidebar />
@@ -62,7 +63,7 @@ export default function Root() {
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         
         {/* Top Header Bar */}
-        <header className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-gray-100 z-40 px-4 md:px-8 py-3">
+        <header className="sticky top-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 z-40 px-4 md:px-8 py-3">
           <div className="max-w-[1400px] mx-auto w-full flex items-center justify-between">
             
             {/* Logo for mobile only (desktop logo is in sidebar) */}
@@ -71,19 +72,24 @@ export default function Root() {
                 <Leaf className="w-4 h-4" />
               </div>
               <div>
-                <span className="font-bold text-gray-900 text-sm tracking-tight">FreshKeep</span>
+                <span className="font-bold text-gray-900 dark:text-white text-sm tracking-tight">FreshKeep</span>
               </div>
             </div>
             
             {/* Spacer for desktop header */}
             <div className="hidden md:block flex-1"></div>
 
-            {/* Authenticated Gmail / Supabase User Profile Pill */}
-          {user && (
-            <div className="relative">
+            <div className="flex items-center gap-3">
+              <div className="md:hidden">
+                <ThemeToggle />
+              </div>
+              
+              {/* Authenticated Gmail / Supabase User Profile Pill */}
+            {user && (
+              <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-2 py-1 px-2.5 rounded-full bg-emerald-50/90 hover:bg-emerald-100/90 border border-emerald-200/60 transition-all text-left shadow-2xs"
+                className="flex items-center gap-2 py-1 px-2.5 rounded-full bg-emerald-50/90 dark:bg-emerald-900/30 hover:bg-emerald-100/90 dark:hover:bg-emerald-800/30 border border-emerald-200/60 dark:border-emerald-700/60 transition-all text-left shadow-2xs"
               >
                 <img
                   src={user.picture}
@@ -99,7 +105,7 @@ export default function Root() {
               {/* Profile Dropdown Menu */}
               {showProfileMenu && (
                 <div
-                  className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 p-3 z-50 animate-in fade-in zoom-in-95 duration-150"
+                  className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-3 z-50 animate-in fade-in zoom-in-95 duration-150"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
@@ -109,7 +115,7 @@ export default function Root() {
                       className="w-10 h-10 rounded-full object-cover border-2 border-emerald-200"
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-gray-900 truncate">{user.name}</p>
+                      <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{user.name}</p>
                       <p className="text-[10px] text-gray-500 truncate">{user.email}</p>
                     </div>
                   </div>
@@ -141,8 +147,9 @@ export default function Root() {
                 </div>
               )}
             </div>
-          )}
-        </div>
+            )}
+            </div>
+          </div>
         </header>
 
         {/* Main Content Scrollable Area */}

@@ -1,7 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ScanLine, LayoutDashboard, ListChecks, Settings } from 'lucide-react';
-import { View, Text } from 'react-native';
-import tw from 'twrnc';
 
 export function BottomNav() {
   const location = useLocation();
@@ -14,29 +12,29 @@ export function BottomNav() {
   ];
 
   return (
-    <View style={tw`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50`}>
-      <View style={tw`max-w-md mx-auto flex flex-row justify-around items-center h-16`}>
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+      <div className="max-w-md mx-auto flex flex-row justify-around items-center h-16">
         {navItems.map(({ path, icon: Icon, label }) => {
           const isActive = location.pathname === path;
           return (
             <Link
               key={path}
               to={path}
-              style={tw`flex flex-col items-center justify-center flex-1 h-full`}
+              className="flex flex-col items-center justify-center flex-1 h-full"
             >
               <Icon
                 color={isActive ? '#86A789' : '#9ca3af'}
                 size={24}
               />
-              <Text
-                style={tw`text-[10px] font-bold mt-1 ${isActive ? 'text-[#86A789]' : 'text-gray-400'}`}
+              <span
+                className={`text-[10px] font-bold mt-1 ${isActive ? 'text-[#86A789]' : 'text-gray-400'}`}
               >
                 {label}
-              </Text>
+              </span>
             </Link>
           );
         })}
-      </View>
-    </View>
+      </div>
+    </div>
   );
 }

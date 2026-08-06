@@ -18,7 +18,7 @@ export default function ShoppingList() {
       name: newItemName.trim(),
       addedDate: new Date().toISOString().split('T')[0],
       completed: false,
-      priority: 'normal'
+      priority: 'normal' as const
     };
     
     addShoppingItem(newItem);

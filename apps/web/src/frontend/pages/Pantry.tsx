@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Package, Search, Plus, Filter, Trash2, Edit2, AlertTriangle, ArrowUpRight, ArrowDownRight, Clock, Box } from 'lucide-react';
+import { Package, Search, Plus, Filter, Trash2, Edit2, AlertTriangle, ArrowUpRight, ArrowDownRight, Clock, Box, LayoutGrid, List } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { FoodItem } from '../../backend/models/types';
 import { getDaysLeft, getCategoryIcon } from '../../backend/logic/helpers';
 import { usePantry } from '@freshkeep/shared';
+import { BoardView } from '../components/BoardView';
 
 export default function Pantry() {
-  const { items, removeItem } = usePantry();
+  const { items, removeItem, updateItem } = usePantry();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'table' | 'board'>('table');
 
   const handleDelete = (id: string) => {
     if (confirm('Are you sure you want to remove this item?')) {
@@ -37,19 +39,19 @@ export default function Pantry() {
   const filteredItems = items.filter(item => {
     const matchesSearch = (item.name || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
-    const matchesStatus = statusFilter === 'all' || getStatus(item.expiryDate) === statusFilter;
+    const matchesStatus = statusFilter === 'all' || getStatus(item.expiryDate || '') === statusFilter;
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
   return (
-    <div className="w-full h-full bg-white md:bg-gray-50 flex justify-center pb-24 md:pb-8">
-      <div className="max-w-[1400px] w-full mx-auto p-4 md:p-8">
+    <div className="w-full h-full bg-white dark:bg-gray-900 md:bg-gray-50 md:dark:bg-gray-900 flex justify-center pb-24 md:pb-8">
+      <div className="max-w-[1400px] w-full mx-auto p-4 md:p-8 flex flex-col h-full">
         
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">My Pantry</h1>
-            <p className="text-sm text-gray-500 font-medium mt-1">
+            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">My Pantry</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">
               Track your food inventory and freshness.
             </p>
           </div>
@@ -60,7 +62,7 @@ export default function Pantry() {
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col lg:flex-row gap-4 mb-6">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col lg:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
             <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
             <input
@@ -68,10 +70,24 @@ export default function Pantry() {
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-11 pr-4 py-2.5 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#86A789]"
+              className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl pl-11 pr-4 py-2.5 text-sm font-semibold text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#86A789]"
             />
           </div>
           <div className="flex gap-4">
+            <div className="hidden lg:flex bg-gray-100 dark:bg-gray-900 p-1 rounded-xl">
+              <button 
+                onClick={() => setViewMode('table')}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm font-bold transition-colors ${viewMode === 'table' ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
+              >
+                <List className="w-4 h-4" /> Table
+              </button>
+              <button 
+                onClick={() => setViewMode('board')}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm font-bold transition-colors ${viewMode === 'board' ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
+              >
+                <LayoutGrid className="w-4 h-4" /> Board
+              </button>
+            </div>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
@@ -87,7 +103,7 @@ export default function Pantry() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#86A789]"
+              className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#86A789]"
             >
               <option value="all">All Statuses</option>
               <option value="fresh">Fresh</option>
@@ -97,9 +113,20 @@ export default function Pantry() {
           </div>
         </div>
 
-        {/* Desktop Table View */}
-        <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          {filteredItems.length === 0 ? (
+        {/* Desktop Views */}
+        <div className="hidden lg:flex flex-col flex-1 min-h-0">
+          {viewMode === 'board' ? (
+            <div className="flex-1 overflow-hidden">
+              <BoardView 
+                items={filteredItems} 
+                onUpdateItemCategory={(id, category) => {
+                  updateItem(id, { category: category as any });
+                }} 
+              />
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden flex-1">
+              {filteredItems.length === 0 ? (
             <div className="py-20 flex flex-col items-center justify-center text-center">
               <Box className="w-12 h-12 text-gray-300 mb-4" />
               <h3 className="text-lg font-bold text-gray-900">No items found</h3>
@@ -108,10 +135,10 @@ export default function Pantry() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[900px]">
-                <thead>
-                  <tr className="bg-gray-50/50 border-b border-gray-100">
+              <div className="overflow-x-auto h-full">
+                <table className="w-full text-left border-collapse min-w-[900px]">
+                  <thead className="sticky top-0 bg-gray-50/90 dark:bg-gray-800/90 backdrop-blur-sm z-10">
+                    <tr className="border-b border-gray-100 dark:border-gray-700">
                     <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Product</th>
                     <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
                     <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Mfg Date</th>
@@ -121,33 +148,33 @@ export default function Pantry() {
                     <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredItems.map(item => {
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                    {filteredItems.map(item => {
                     const days = item.expiryDate ? getDaysLeft(item.expiryDate) : null;
-                    const status = getStatus(item.expiryDate);
+                    const status = getStatus(item.expiryDate || '');
                     return (
-                      <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
+                      <tr key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors group">
+                          <td className="px-6 py-4">
+                            <span className="text-sm font-bold text-gray-900 dark:text-white block">{item.name}</span>
+                            <span className="text-[10px] font-semibold text-gray-400">Added {item.addedDate}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-gray-400">{getCategoryIcon(item.category)}</span>
+                              <span className="text-sm font-semibold text-gray-600 dark:text-gray-300 capitalize">{item.category}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-400">{item.manufacturingDate || '-'}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm font-bold text-gray-900 dark:text-white">{item.expiryDate || 'Unknown'}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm font-mono text-gray-500">{item.batchNumber || '-'}</span>
+                          </td>
                         <td className="px-6 py-4">
-                          <span className="text-sm font-bold text-gray-900 block">{item.name}</span>
-                          <span className="text-[10px] font-semibold text-gray-400">Added {item.addedDate}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <span className="text-gray-400">{getCategoryIcon(item.category)}</span>
-                            <span className="text-sm font-semibold text-gray-600 capitalize">{item.category}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-semibold text-gray-700">{item.manufacturingDate || '-'}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-bold text-gray-900">{item.expiryDate || 'Unknown'}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-mono text-gray-500">{item.batchNumber || '-'}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          {getStatusBadge(status, days)}
+                          {getStatusBadge(status, days || 0)}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -164,34 +191,36 @@ export default function Pantry() {
                   })}
                 </tbody>
               </table>
+              </div>
+            )}
             </div>
           )}
         </div>
 
         {/* Mobile/Tablet Card View */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden mt-4">
           {filteredItems.map(item => {
-            const days = getDaysLeft(item.expiryDate);
-            const status = getStatus(item.expiryDate);
+            const days = getDaysLeft(item.expiryDate || '');
+            const status = getStatus(item.expiryDate || '');
             return (
-              <div key={item.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 relative overflow-hidden flex flex-col">
+              <div key={item.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 relative overflow-hidden flex flex-col">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500">
+                    <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-500">
                       {getCategoryIcon(item.category)}
                     </div>
                     <div>
-                      <h3 className="text-sm font-extrabold text-gray-900 line-clamp-1">{item.name}</h3>
+                      <h3 className="text-sm font-extrabold text-gray-900 dark:text-white line-clamp-1">{item.name}</h3>
                       <p className="text-xs font-semibold text-gray-400 capitalize">{item.category}</p>
                     </div>
                   </div>
-                  {getStatusBadge(status, days)}
+                  {getStatusBadge(status, days || 0)}
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-3 mb-4 space-y-2">
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 mb-4 space-y-2">
                   <div className="flex justify-between text-xs">
-                    <span className="font-semibold text-gray-500">Expiry Date</span>
-                    <span className="font-bold text-gray-900">{item.expiryDate}</span>
+                    <span className="font-semibold text-gray-500 dark:text-gray-400">Expiry Date</span>
+                    <span className="font-bold text-gray-900 dark:text-white">{item.expiryDate}</span>
                   </div>
                   {item.manufacturingDate && (
                     <div className="flex justify-between text-xs">
@@ -220,9 +249,9 @@ export default function Pantry() {
           })}
 
           {filteredItems.length === 0 && (
-            <div className="col-span-full py-12 flex flex-col items-center justify-center text-center bg-white rounded-2xl border border-gray-100">
-              <Box className="w-10 h-10 text-gray-300 mb-3" />
-              <p className="text-sm font-bold text-gray-700">No items found</p>
+            <div className="col-span-full py-12 flex flex-col items-center justify-center text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+              <Box className="w-10 h-10 text-gray-300 dark:text-gray-600 mb-3" />
+              <p className="text-sm font-bold text-gray-700 dark:text-gray-300">No items found</p>
             </div>
           )}
         </div>
